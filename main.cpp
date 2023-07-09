@@ -31,13 +31,13 @@ int main()
 	mvwprintw(operation_window,0,1,"Simple Cashier System");
 	wattroff(operation_window,A_BOLD);
 	mvwprintw(operation_window,1,1,"Please Select Operation");
-	mvwprintw(operation_window,2,1,"S = Scan Mode");
+	mvwprintw(operation_window,2,1,"I = Manual Insert Mode");
 	mvwprintw(operation_window,3,1,"E = Edit Mode");
 	mvwprintw(operation_window,4,1,"D = Delete Mode");
 	mvwprintw(operation_window,5,1,"X = Exit");
 	operation = wgetch(operation_window);
 //	fprintf(stderr,"recieved input %c\n",operation); // For Scan Mode
-	if(operation == 's' || operation == 'S'){
+	if(operation == 'i' || operation == 'I'){
 		cashier.clearevery();
 		std::vector<productinfo> products;
 		int i_row,i_col,l_row,l_col;
