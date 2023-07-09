@@ -24,35 +24,34 @@ int main()
 	operation_menu:
 	curs_set(0);
 	getmaxyx(stdscr,row,col);
-	WINDOW * operation_window = newwin(row*.50,col*.50,row*.25,col*.25);
+	WINDOW * operation_window;
+	operation_window = newwin(row*.50,col*.50,row*.25,col*.25);
 	box(operation_window,0,0);
 	wattron(operation_window,A_BOLD);
 	mvwprintw(operation_window,0,1,"Simple Cashier System");
 	wattroff(operation_window,A_BOLD);
 	mvwprintw(operation_window,1,1,"Please Select Operation");
-	mvwprintw(operation_window,2,1,"I = Manual Input Mode");
+	mvwprintw(operation_window,2,1,"S = Scan Mode");
 	mvwprintw(operation_window,3,1,"E = Edit Mode");
 	mvwprintw(operation_window,4,1,"D = Delete Mode");
 	mvwprintw(operation_window,5,1,"X = Exit");
-	refresh();
-	wrefresh(operation_window);
 	operation = wgetch(operation_window);
-	delwin(operation_window);
 //	fprintf(stderr,"recieved input %c\n",operation); // For Scan Mode
-	if(operation == 'i' || operation == 'I'){
+	if(operation == 's' || operation == 'S'){
 		cashier.clearevery();
 		std::vector<productinfo> products;
 		int i_row,i_col,l_row,l_col;
-		refresh();
 		std::string input;
 		// Basic windows for scan mode
 //		fprintf(stderr,"Doing scan mode\n");
 		scan_input:
-		WINDOW * listing_window = newwin(0,col*.50,0,0);
+		WINDOW* listing_window;
+		listing_window = newwin(0,col*.50,0,0);
 		getmaxyx(listing_window,l_row,l_col);
-		scrollok(listing_window,TRUE);
 		box(listing_window,0,0);
+		wattron(listing_window,A_BOLD);
 		mvwprintw(listing_window,0,1,"List");
+		wattroff(listing_window,A_BOLD);
 		for(int i = 0 ; i < products.size() ; i++ ){
 			wmove(listing_window,1+i*2,1);
 			wattron(listing_window,A_BOLD);
@@ -65,12 +64,13 @@ int main()
 		}
 		wattroff(listing_window,A_BOLD);
 
-		WINDOW * input_window = newwin(row*.50,col*.50,0,col*.50);
+		WINDOW * input_window;
+		 input_window = newwin(row*.50,col*.50,0,col*.50);
 		box(input_window,0,0);
 		wattron(input_window,A_BOLD);
 		mvwprintw(input_window,0,1,"Input");
 		wattroff(input_window,A_BOLD);
-		mvwprintw(input_window,1,1,"Insert mode, Insert the code in the Input window");
+		mvwprintw(input_window,1,1,"Scan mode, Scan the code in the Input window");
 		mvwprintw(input_window,2,1,"Type your product code to see the product name");
 		mvwprintw(input_window,3,1,"press X once you are done,");
 		mvwprintw(input_window,4,1,"press W for payment process");
@@ -79,7 +79,8 @@ int main()
 		mvwprintw(input_window,9,1,"Price: %f", cashier.prodprice());
 		// mvwprintw(input_window,1,1,dt);
 
-		WINDOW * total_window = newwin(row*.50,col*.50,row*.50,col*.50);
+		WINDOW * total_window;
+		total_window = newwin(row*.50,col*.50,row*.50,col*.50);
 		box(total_window,0,0);
 		wattron(total_window,A_BOLD);
 		mvwprintw(total_window,0,1,"Total");
@@ -87,14 +88,11 @@ int main()
 		mvwprintw(total_window,1,1,"Date: %s",dt.c_str());
 		mvwprintw(total_window,2,1,"Total: %f",cashier.prodtotal());
 
-		// Refreshing the windows
 		curs_set(1);
-		refresh();
 		wrefresh(listing_window);
 		wrefresh(total_window);
 		wrefresh(input_window);
 		getmaxyx(input_window,i_row,i_col);
-		wmove(input_window,2,2);
 		char scaninput[90];
 		mvwprintw(input_window,i_row-2,1,"Scan: ");
 		mvwscanw(input_window,i_row-2,7,"%s",scaninput);
@@ -104,15 +102,14 @@ int main()
 			goto operation_menu;
 		}
 		if(input[0] == 'w' or input[0] == 'W'){
-			delwin(input_window);
-			delwin(total_window);
-			delwin(listing_window);
 			int p_row,p_col;
 			float payment;
 			WINDOW * pay_window = newwin(row*.50,col*.50,row*.25,col*.25);
 			getmaxyx(pay_window,p_row,p_col);
 			box(pay_window,0,0);
+			wattron(pay_window, A_BOLD);
 			mvwprintw(pay_window,0,1,"Payment");
+			wattroff(pay_window, A_BOLD);
 			mvwprintw(pay_window,1,1,"Please enter the amount you want to pay");
 			mvwprintw(pay_window,2,1,"Current Date: %s",dt.c_str());
 			mvwprintw(pay_window,4,1,"Items: %d",products.size());
@@ -121,7 +118,6 @@ int main()
 			char c_payment[80];
 			p_repeat:
 			mvwprintw(pay_window,p_row-2,1,"Payment:          ");
-			wrefresh(pay_window);
 			mvwscanw(pay_window,p_row-2,10,"%s",c_payment);
 			payment = atof(c_payment);
 			if(payment < cashier.prodtotal()){
@@ -134,8 +130,8 @@ int main()
 			wattroff(pay_window,A_BLINK);
 			products.clear();
 			cashier.clearevery();
-			wrefresh(pay_window);
 			wgetch(pay_window);
+			goto scan_input;
 		}
 		// call for class of cashier where you scan things
 		// from logic.h
@@ -154,16 +150,16 @@ int main()
 		int e_row, e_col;
 		curs_set(1);
 		e_repeat:
-		refresh();
 //		fprintf(stderr,"Doing Editting mode\n");
-		WINDOW * editting_window = newwin(row*.5,col*.5,row*.25,col*.25);
+		WINDOW * editting_window;
+		editting_window = newwin(row*.5,col*.5,row*.25,col*.25);
 		box(editting_window,0,0);
 		getmaxyx(editting_window,e_row,e_col);
+		wattron(editting_window, A_BOLD);
 		mvwprintw(editting_window,0,1,"Editting Mode");
+		wattroff(editting_window, A_BOLD);
 		mvwprintw(editting_window,1,1,"Welcome to editting mode, Please enter the code you want to scan");
 		mvwprintw(editting_window,2,1,"Press x if you want to exit Editting mode");
-		wmove(editting_window,1,1);
-		wrefresh(editting_window);
 		std::string code,name,price;
 		char scaninput[256];
 		mvwprintw(editting_window,e_row-2,1,"Code:                          ");
@@ -179,14 +175,9 @@ int main()
 		mvwprintw(editting_window,e_row-2,1,"Price:                   ");
 		mvwscanw(editting_window,e_row-2,8,"%s",scaninput);
 		price = std::string(scaninput);
-		// check if price is a number
-		for(char a : price){
-			if(!(a<=57 or a >= 48 or a==46)){
-				attron(A_BOLD);
-				mvwprintw(editting_window,2,1,"Price is not a number Please try again");
-				attroff(A_BOLD);
-				goto price_in;
-			}
+		if(atof(scaninput) == 0 && scaninput[0]!='0'){
+			mvwprintw(editting_window,2,1,"Price is not a number Please try again");
+			goto price_in;
 		}
 		cashier.scan(code);
 		if(cashier.prodname() != ""){ // check if theres a duplicate
@@ -220,7 +211,8 @@ int main()
 		std::string input;
 		char dinput[80];
 //		fprintf(stderr, "Doing Delete mode\n");
-		WINDOW * deleting_window = newwin(row*.5,col*.5,row*.25,col*.25);
+		WINDOW * deleting_window;
+		deleting_window = newwin(row*.5,col*.5,row*.25,col*.25);
 		box(deleting_window,0,0);
 		getmaxyx(deleting_window,d_row,d_col);
 		wattron(deleting_window,A_BOLD);
@@ -229,9 +221,8 @@ int main()
 		mvwprintw(deleting_window,1,1,"Welcome to delete mode.");
 		mvwprintw(deleting_window,2,1,"please insert the code of the product you want to delete");
 		mvwprintw(deleting_window,3,1,"type x and enter if you want to exit");
-		wrefresh(deleting_window);
-		d_repeat:
 		mvwprintw(deleting_window,d_row-2,1,"Code: ");
+		d_repeat:
 		mvwscanw(deleting_window,d_row-2,7,"%s",dinput);
 		if(dinput[0] == 'x' or dinput[0] == 'X')
 			goto operation_menu;
@@ -240,12 +231,10 @@ int main()
 		goto d_repeat;
 	}
 	if(operation == 'x' || operation == 'X'){
-		refresh();
 		curs_set(1);
 		echo();
 		endwin();
 		return 0;
 	}
-	endwin();
 	goto operation_menu;
 }
