@@ -32,18 +32,17 @@ int main()
 	wattroff(operation_window,A_BOLD);
 	mvwprintw(operation_window,1,1,"Please Select Operation");
 	mvwprintw(operation_window,2,1,"I = Manual Insert Mode");
+//	mvwprintw(operation_window,2,1,"S = Scan Mode"); // old code changed to I as per request of sir
 	mvwprintw(operation_window,3,1,"E = Edit Mode");
 	mvwprintw(operation_window,4,1,"D = Delete Mode");
 	mvwprintw(operation_window,5,1,"X = Exit");
 	operation = wgetch(operation_window);
-//	fprintf(stderr,"recieved input %c\n",operation); // For Scan Mode
+//	if(operation == 's' || operation == 'S'){ // old code changed to I as per request of sir
 	if(operation == 'i' || operation == 'I'){
 		cashier.clearevery();
 		std::vector<productinfo> products;
 		int i_row,i_col,l_row,l_col;
 		std::string input;
-		// Basic windows for scan mode
-//		fprintf(stderr,"Doing scan mode\n");
 		scan_input:
 		WINDOW* listing_window;
 		listing_window = newwin(0,col*.50,0,0);
@@ -77,7 +76,6 @@ int main()
 		mvwprintw(input_window,7,1,"Code: %s",cashier.prodcode().c_str());
 		mvwprintw(input_window,8,1,"Name: %s",cashier.prodname().c_str());
 		mvwprintw(input_window,9,1,"Price: %f", cashier.prodprice());
-		// mvwprintw(input_window,1,1,dt);
 
 		WINDOW * total_window;
 		total_window = newwin(row*.50,col*.50,row*.50,col*.50);
@@ -133,9 +131,6 @@ int main()
 			wgetch(pay_window);
 			goto scan_input;
 		}
-		// call for class of cashier where you scan things
-		// from logic.h
-		// Continuation later ^-^
 		cashier.scan(input);
 		if(cashier.prodname() != ""){
 			struct productinfo info;
@@ -150,7 +145,6 @@ int main()
 		int e_row, e_col;
 		curs_set(1);
 		e_repeat:
-//		fprintf(stderr,"Doing Editting mode\n");
 		WINDOW * editting_window;
 		editting_window = newwin(row*.5,col*.5,row*.25,col*.25);
 		box(editting_window,0,0);
@@ -210,7 +204,6 @@ int main()
 		curs_set(1);
 		std::string input;
 		char dinput[80];
-//		fprintf(stderr, "Doing Delete mode\n");
 		WINDOW * deleting_window;
 		deleting_window = newwin(row*.5,col*.5,row*.25,col*.25);
 		box(deleting_window,0,0);
